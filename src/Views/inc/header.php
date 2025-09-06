@@ -22,6 +22,12 @@
         .btn-primary { background-color: #007bff; border-color: #007bff;}
         .btn-danger { background-color: #dc3545; border-color: #dc3545;}
         .btn-sm { padding: .25rem .5rem; font-size: .875rem; line-height: 1.5; border-radius: .2rem; }
+        /* Dropdown styles */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; background-color: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; list-style: none; padding: 0; margin: 0; border-radius: 4px;}
+        .dropdown-content li a { color: black; padding: 12px 16px; text-decoration: none; display: block; }
+        .dropdown-content li a:hover { background-color: #f1f1f1; }
+        .dropdown:hover .dropdown-content { display: block; }
     </style>
 </head>
 <body>
@@ -36,6 +42,14 @@
                     <li><a href="<?php echo URL_ROOT; ?>/public/quotes">Quotes</a></li>
                     <li><a href="<?php echo URL_ROOT; ?>/public/customers">Customers</a></li>
                     <li><a href="<?php echo URL_ROOT; ?>/public/products">Products</a></li>
+                    <li class="dropdown">
+                        <a href="javascript:void(0)">Settings</a>
+                        <ul class="dropdown-content">
+                            <li><a href="<?php echo URL_ROOT; ?>/public/settings">General Settings</a></li>
+                            <li><a href="<?php echo URL_ROOT; ?>/public/productcategories">Product Categories</a></li>
+                            <li><a href="<?php echo URL_ROOT; ?>/public/suppliers">Suppliers</a></li>
+                        </ul>
+                    </li>
                     <li style="margin-left: 40px;">Welcome, <?php echo $_SESSION['user_name']; ?></li>
                     <li><a href="<?php echo URL_ROOT; ?>/public/users/logout">Logout</a></li>
                 <?php else : ?>

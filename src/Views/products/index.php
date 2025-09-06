@@ -14,7 +14,10 @@
 
 <div class="page-header">
     <h1><?php echo $title; ?></h1>
-    <a href="<?php echo URL_ROOT; ?>/public/products/add" class="btn btn-primary">Add Product</a>
+    <div>
+        <a href="<?php echo URL_ROOT; ?>/public/products/adjustments" class="btn btn-secondary">Stock Adjustments</a>
+        <a href="<?php echo URL_ROOT; ?>/public/products/add" class="btn btn-primary" style="margin-left: 10px;">Add Product</a>
+    </div>
 </div>
 
 <table class="table">

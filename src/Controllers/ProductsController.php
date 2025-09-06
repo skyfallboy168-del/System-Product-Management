@@ -9,7 +9,6 @@ class Products extends Controller {
     private $supplierModel;
 
     public function __construct() {
-        // Redirect non-logged-in users
         if (!isLoggedIn()) {
             header('Location: ' . URL_ROOT . '/public/users/login');
             exit();
@@ -20,9 +19,6 @@ class Products extends Controller {
         $this->supplierModel = $this->model('Supplier');
     }
 
-    /**
-     * Show product list for the company.
-     */
     public function index() {
         $products = $this->productModel->findAllByCompany($_SESSION['company_id']);
         $data = [
@@ -32,103 +28,52 @@ class Products extends Controller {
         $this->view('products/index', $data);
     }
 
-    /**
-     * Show form to add a new product and handle POST request.
-     */
     public function add() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $data = $this->getPostData();
+            $data['company_id'] = $_SESSION['company_id'];
 
-            $data = [
-                'name' => trim($_POST['name']),
-                'sku' => trim($_POST['sku']),
-                'description' => trim($_POST['description']),
-                'unit' => trim($_POST['unit']),
-                'purchase_price' => trim($_POST['purchase_price']),
-                'selling_price_1' => trim($_POST['selling_price_1']),
-                'category_id' => $_POST['category_id'],
-                'supplier_id' => $_POST['supplier_id'],
-                'company_id' => $_SESSION['company_id'],
-                'name_err' => '',
-                'sku_err' => '',
-                'selling_price_1_err' => ''
-            ];
-
-            // Validation
-            if (empty($data['name'])) {
-                $data['name_err'] = 'Please enter product name';
-            }
-            if (empty($data['sku'])) {
-                $data['sku_err'] = 'Please enter SKU';
-            }
-            if (empty($data['selling_price_1'])) {
-                $data['selling_price_1_err'] = 'Please enter a selling price';
-            }
+            if (empty($data['name'])) $data['name_err'] = 'Please enter product name';
+            if (empty($data['sku'])) $data['sku_err'] = 'Please enter SKU';
+            if (empty($data['selling_price_1'])) $data['selling_price_1_err'] = 'Please enter a default selling price';
 
             if (empty($data['name_err']) && empty($data['sku_err']) && empty($data['selling_price_1_err'])) {
                 if ($this->productModel->create($data)) {
-                    // Redirect to product list
                     header('Location: ' . URL_ROOT . '/public/products');
                     exit();
                 } else {
-                    die('Something went wrong');
+                    die('Something went wrong creating the product.');
                 }
             } else {
-                // Load view with errors
                 $this->loadFormWithData($data);
             }
-
         } else {
             $this->loadFormWithData();
         }
     }
 
-    /**
-     * Show form to edit a product and handle POST request.
-     * @param int $id The product ID.
-     */
     public function edit($id) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $data = $this->getPostData();
+            $data['id'] = $id;
+            $data['company_id'] = $_SESSION['company_id'];
 
-            $data = [
-                'id' => $id,
-                'name' => trim($_POST['name']),
-                'sku' => trim($_POST['sku']),
-                'description' => trim($_POST['description']),
-                'unit' => trim($_POST['unit']),
-                'purchase_price' => trim($_POST['purchase_price']),
-                'selling_price_1' => trim($_POST['selling_price_1']),
-                'category_id' => $_POST['category_id'],
-                'supplier_id' => $_POST['supplier_id'],
-                'company_id' => $_SESSION['company_id'],
-                'name_err' => '',
-                'sku_err' => '',
-                'selling_price_1_err' => ''
-            ];
-
-            // Validation (same as add)
-            if (empty($data['name'])) {
-                $data['name_err'] = 'Please enter product name';
-            }
-            if (empty($data['sku'])) {
-                $data['sku_err'] = 'Please enter SKU';
-            }
-            if (empty($data['selling_price_1'])) {
-                $data['selling_price_1_err'] = 'Please enter a selling price';
-            }
+            if (empty($data['name'])) $data['name_err'] = 'Please enter product name';
+            if (empty($data['sku'])) $data['sku_err'] = 'Please enter SKU';
+            if (empty($data['selling_price_1'])) $data['selling_price_1_err'] = 'Please enter a default selling price';
 
             if (empty($data['name_err']) && empty($data['sku_err']) && empty($data['selling_price_1_err'])) {
                 if ($this->productModel->update($data)) {
                     header('Location: ' . URL_ROOT . '/public/products');
                     exit();
                 } else {
-                    die('Something went wrong');
+                    die('Something went wrong updating the product.');
                 }
             } else {
                 $this->loadFormWithData($data);
             }
-
         } else {
             $product = $this->productModel->findById($id, $_SESSION['company_id']);
             if (!$product) {
@@ -139,13 +84,9 @@ class Products extends Controller {
         }
     }
 
-    /**
-     * Handle product deletion.
-     * @param int $id The product ID.
-     */
-    public function delete($id){
-        if($_SERVER['REQUEST_METHOD'] == 'POST'){
-            if($this->productModel->delete($id, $_SESSION['company_id'])){
+    public function delete($id) {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            if ($this->productModel->delete($id, $_SESSION['company_id'])) {
                 header('Location: ' . URL_ROOT . '/public/products');
                 exit();
             } else {
@@ -157,35 +98,99 @@ class Products extends Controller {
         }
     }
 
-
-    /**
-     * Helper function to load the add/edit form with necessary data.
-     * @param array $data Data to populate the form with.
-     */
-    private function loadFormWithData($data = []) {
-        // Get categories and suppliers for dropdowns
-        $categories = $this->categoryModel->findAllByCompany($_SESSION['company_id']);
-        $suppliers = $this->supplierModel->findAllByCompany($_SESSION['company_id']);
-
-        $defaultData = [
-            'id' => '',
-            'name' => '',
-            'sku' => '',
-            'description' => '',
-            'unit' => 'pcs',
-            'purchase_price' => '',
-            'selling_price_1' => '',
-            'category_id' => null,
-            'supplier_id' => null,
-            'categories' => $categories,
-            'suppliers' => $suppliers,
+    private function getPostData() {
+        $data = [
+            'name' => trim($_POST['name']),
+            'sku' => trim($_POST['sku']),
+            'barcode' => trim($_POST['barcode']),
+            'description' => trim($_POST['description']),
+            'unit' => trim($_POST['unit']),
+            'category_id' => $_POST['category_id'],
+            'supplier_id' => $_POST['supplier_id'],
+            'purchase_price' => trim($_POST['purchase_price']) ?: 0,
+            'markup_percentage' => trim($_POST['markup_percentage']) ?: 0,
+            'selling_price_1' => trim($_POST['selling_price_1']) ?: 0,
+            'selling_price_2' => trim($_POST['selling_price_2']) ?: 0,
+            'discount_price_1' => trim($_POST['discount_price_1']) ?: 0,
+            'discount_price_2' => trim($_POST['discount_price_2']) ?: 0,
+            'discount_price_3' => trim($_POST['discount_price_3']) ?: 0,
             'name_err' => '',
             'sku_err' => '',
             'selling_price_1_err' => ''
         ];
+        return $data;
+    }
+
+    private function loadFormWithData($data = []) {
+        $categories = $this->categoryModel->findAllByCompany($_SESSION['company_id']);
+        $suppliers = $this->supplierModel->findAllByCompany($_SESSION['company_id']);
+
+        $defaultData = [
+            'id' => '', 'name' => '', 'sku' => '', 'barcode' => '', 'description' => '', 'unit' => 'pcs',
+            'category_id' => null, 'supplier_id' => null, 'purchase_price' => '', 'markup_percentage' => '',
+            'selling_price_1' => '', 'selling_price_2' => '', 'discount_price_1' => '', 'discount_price_2' => '', 'discount_price_3' => '',
+            'categories' => $categories, 'suppliers' => $suppliers,
+            'name_err' => '', 'sku_err' => '', 'selling_price_1_err' => ''
+        ];
 
         $viewData = array_merge($defaultData, $data);
-
         $this->view('products/form', $viewData);
+    }
+
+    public function adjustments() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $data = [
+                'product_id' => $_POST['product_id'],
+                'type' => $_POST['type'],
+                'quantity' => trim($_POST['quantity']),
+                'reason' => trim($_POST['reason']),
+                'product_err' => '',
+                'quantity_err' => ''
+            ];
+
+            if(empty($data['product_id'])) $data['product_err'] = 'Please select a product.';
+            if(empty($data['quantity']) || !is_numeric($data['quantity']) || $data['quantity'] == 0) {
+                $data['quantity_err'] = 'Please enter a valid, non-zero quantity.';
+            }
+
+            if(empty($data['product_err']) && empty($data['quantity_err'])) {
+                $quantity = $data['type'] === 'stock-out' ? -$data['quantity'] : $data['quantity'];
+
+                // Use a transaction to ensure both operations succeed or fail together
+                $this->productModel->adjustStock($data['product_id'], $quantity);
+
+                $inventoryMovementModel = $this->model('InventoryMovement');
+                $movementData = [
+                    'product_id' => $data['product_id'],
+                    'user_id' => $_SESSION['user_id'],
+                    'type' => $data['type'],
+                    'quantity' => $quantity,
+                    'reason' => $data['reason'],
+                    'related_document_type' => 'Manual Adjustment',
+                    'related_document_id' => null
+                ];
+                $inventoryMovementModel->create($movementData);
+
+                header('Location: ' . URL_ROOT . '/public/products');
+                exit();
+            } else {
+                // Reload form with errors
+                $products = $this->productModel->findAllByCompany($_SESSION['company_id']);
+                $data['products'] = $products;
+                $data['title'] = 'Stock Adjustments';
+                $this->view('products/adjustments', $data);
+            }
+
+        } else {
+            $products = $this->productModel->findAllByCompany($_SESSION['company_id']);
+            $data = [
+                'title' => 'Stock Adjustments',
+                'products' => $products,
+                'product_id' => '', 'type' => 'stock-in', 'quantity' => '', 'reason' => '',
+                'product_err' => '', 'quantity_err' => ''
+            ];
+            $this->view('products/adjustments', $data);
+        }
     }
 }

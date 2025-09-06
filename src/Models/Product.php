@@ -10,11 +10,6 @@ class Product {
         $this->db = Database::getInstance();
     }
 
-    /**
-     * Get all products for a specific company.
-     * @param int $company_id
-     * @return array
-     */
     public function findAllByCompany($company_id) {
         $this->db->query('
             SELECT
@@ -31,12 +26,6 @@ class Product {
         return $this->db->resultSet();
     }
 
-    /**
-     * Find a product by its ID, ensuring it belongs to the company.
-     * @param int $id
-     * @param int $company_id
-     * @return object|false
-     */
     public function findById($id, $company_id) {
         $this->db->query('SELECT * FROM products WHERE id = :id AND company_id = :company_id');
         $this->db->bind(':id', $id);
@@ -45,73 +34,56 @@ class Product {
         return $this->db->rowCount() > 0 ? $row : false;
     }
 
-    /**
-     * Add a new product.
-     * @param array $data
-     * @return bool
-     */
     public function create($data) {
         $this->db->query('
             INSERT INTO products
-            (company_id, category_id, supplier_id, sku, name, description, unit, purchase_price, selling_price_1)
+            (company_id, category_id, supplier_id, sku, barcode, name, description, unit,
+            purchase_price, markup_percentage, selling_price_1, selling_price_2,
+            discount_price_1, discount_price_2, discount_price_3)
             VALUES
-            (:company_id, :category_id, :supplier_id, :sku, :name, :description, :unit, :purchase_price, :selling_price_1)
+            (:company_id, :category_id, :supplier_id, :sku, :barcode, :name, :description, :unit,
+            :purchase_price, :markup_percentage, :selling_price_1, :selling_price_2,
+            :discount_price_1, :discount_price_2, :discount_price_3)
         ');
 
-        // Bind values
-        $this->db->bind(':company_id', $data['company_id']);
-        $this->db->bind(':category_id', $data['category_id']);
-        $this->db->bind(':supplier_id', $data['supplier_id']);
-        $this->db->bind(':sku', $data['sku']);
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':description', $data['description']);
-        $this->db->bind(':unit', $data['unit']);
-        $this->db->bind(':purchase_price', $data['purchase_price']);
-        $this->db->bind(':selling_price_1', $data['selling_price_1']);
-
+        $this->bindProductData($data);
         return $this->db->execute();
     }
 
-    /**
-     * Update an existing product.
-     * @param array $data
-     * @return bool
-     */
     public function update($data) {
         $this->db->query('
             UPDATE products SET
-                category_id = :category_id,
-                supplier_id = :supplier_id,
-                sku = :sku,
-                name = :name,
-                description = :description,
-                unit = :unit,
-                purchase_price = :purchase_price,
-                selling_price_1 = :selling_price_1
+                category_id = :category_id, supplier_id = :supplier_id, sku = :sku, barcode = :barcode,
+                name = :name, description = :description, unit = :unit, purchase_price = :purchase_price,
+                markup_percentage = :markup_percentage, selling_price_1 = :selling_price_1,
+                selling_price_2 = :selling_price_2, discount_price_1 = :discount_price_1,
+                discount_price_2 = :discount_price_2, discount_price_3 = :discount_price_3
             WHERE id = :id AND company_id = :company_id
         ');
 
-        // Bind values
+        $this->bindProductData($data);
         $this->db->bind(':id', $data['id']);
+        return $this->db->execute();
+    }
+
+    private function bindProductData($data) {
         $this->db->bind(':company_id', $data['company_id']);
         $this->db->bind(':category_id', $data['category_id']);
         $this->db->bind(':supplier_id', $data['supplier_id']);
         $this->db->bind(':sku', $data['sku']);
+        $this->db->bind(':barcode', $data['barcode']);
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':unit', $data['unit']);
         $this->db->bind(':purchase_price', $data['purchase_price']);
+        $this->db->bind(':markup_percentage', $data['markup_percentage']);
         $this->db->bind(':selling_price_1', $data['selling_price_1']);
-
-        return $this->db->execute();
+        $this->db->bind(':selling_price_2', $data['selling_price_2']);
+        $this->db->bind(':discount_price_1', $data['discount_price_1']);
+        $this->db->bind(':discount_price_2', $data['discount_price_2']);
+        $this->db->bind(':discount_price_3', $data['discount_price_3']);
     }
 
-    /**
-     * Delete a product.
-     * @param int $id
-     * @param int $company_id
-     * @return bool
-     */
     public function delete($id, $company_id) {
         $this->db->query('DELETE FROM products WHERE id = :id AND company_id = :company_id');
         $this->db->bind(':id', $id);
@@ -119,13 +91,6 @@ class Product {
         return $this->db->execute();
     }
 
-    /**
-     * Adjust the stock quantity for a product.
-     * Can be positive (stock-in) or negative (stock-out).
-     * @param int $product_id
-     * @param float $quantity
-     * @return bool
-     */
     public function adjustStock($product_id, $quantity) {
         $this->db->query('UPDATE products SET stock_quantity = stock_quantity + :quantity WHERE id = :id');
         $this->db->bind(':quantity', $quantity);
