@@ -15,6 +15,7 @@ class Settings extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Process form
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);

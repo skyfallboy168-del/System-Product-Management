@@ -15,6 +15,7 @@ class ProductCategories extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('settings-manage');
         $categories = $this->categoryModel->findAllByCompany($_SESSION['company_id']);
         $data = [
             'title' => 'Product Categories',
@@ -24,6 +25,7 @@ class ProductCategories extends Controller {
     }
 
     public function add() {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = [
@@ -56,6 +58,7 @@ class ProductCategories extends Controller {
     }
 
     public function edit($id) {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = [
@@ -95,6 +98,7 @@ class ProductCategories extends Controller {
     }
 
     public function delete($id) {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($this->categoryModel->delete($id, $_SESSION['company_id'])) {
                 header('Location: ' . URL_ROOT . '/public/productcategories');

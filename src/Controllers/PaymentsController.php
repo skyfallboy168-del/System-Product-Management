@@ -18,6 +18,7 @@ class Payments extends Controller {
      * Handle the submission of the "Add Payment" form.
      */
     public function add() {
+        \Core\Auth::gate('payment-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 

@@ -20,6 +20,7 @@ class Products extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('product-view'); // Or 'product-manage' for full access
         $products = $this->productModel->findAllByCompany($_SESSION['company_id']);
         $data = [
             'title' => 'Products',
@@ -29,6 +30,7 @@ class Products extends Controller {
     }
 
     public function add() {
+        \Core\Auth::gate('product-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = $this->getPostData();
@@ -54,6 +56,7 @@ class Products extends Controller {
     }
 
     public function edit($id) {
+        \Core\Auth::gate('product-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = $this->getPostData();
@@ -85,6 +88,7 @@ class Products extends Controller {
     }
 
     public function delete($id) {
+        \Core\Auth::gate('product-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($this->productModel->delete($id, $_SESSION['company_id'])) {
                 header('Location: ' . URL_ROOT . '/public/products');
@@ -138,6 +142,7 @@ class Products extends Controller {
     }
 
     public function adjustments() {
+        \Core\Auth::gate('product-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = [

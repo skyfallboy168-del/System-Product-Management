@@ -22,6 +22,7 @@ class Invoices extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('invoice-manage');
         $invoices = $this->invoiceModel->findAllByCompany($_SESSION['company_id']);
         $data = [
             'title' => 'Invoices',
@@ -31,6 +32,7 @@ class Invoices extends Controller {
     }
 
     public function view($id) {
+        \Core\Auth::gate('invoice-manage');
         $invoice = $this->invoiceModel->findById($id, $_SESSION['company_id']);
         if (!$invoice) {
             header('Location: ' . URL_ROOT . '/public/invoices');
@@ -52,6 +54,7 @@ class Invoices extends Controller {
     }
 
     public function add() {
+        \Core\Auth::gate('invoice-manage');
         // This will be very similar to the QuotesController add method.
         // It will use a similar form and JavaScript.
         // For now, redirect to the index.
@@ -60,6 +63,7 @@ class Invoices extends Controller {
     }
 
     public function createFromQuote($quote_id) {
+        \Core\Auth::gate('invoice-manage');
         // Ensure this is a POST request if you want to prevent accidental creation via URL
         // For simplicity, we'll allow GET for now.
 

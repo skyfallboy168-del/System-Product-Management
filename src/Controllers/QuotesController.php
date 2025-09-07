@@ -20,6 +20,7 @@ class Quotes extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('quote-manage');
         $quotes = $this->quoteModel->findAllByCompany($_SESSION['company_id']);
         $data = [
             'title' => 'Quotes',
@@ -29,6 +30,7 @@ class Quotes extends Controller {
     }
 
     public function add() {
+        \Core\Auth::gate('quote-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
@@ -120,6 +122,7 @@ class Quotes extends Controller {
     }
 
     public function view($id) {
+        \Core\Auth::gate('quote-manage');
         $quote = $this->quoteModel->findById($id, $_SESSION['company_id']);
         if (!$quote) {
             header('Location: ' . URL_ROOT . '/public/quotes');
@@ -139,6 +142,7 @@ class Quotes extends Controller {
     }
 
     public function updateStatus($id) {
+        \Core\Auth::gate('quote-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $status = $_POST['status'];
             // Add validation for status value if needed

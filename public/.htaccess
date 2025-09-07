@@ -1,16 +1,10 @@
 <IfModule mod_rewrite.c>
-    # Enable Rewrite Engine
     RewriteEngine On
 
-    # Set the base directory for rewriting
-    RewriteBase /biz-master/public/
-
-    # Redirect trailing slashes if not a folder
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)/$ /$1 [L,R=301]
-
-    # Rewrite all requests to index.php if the file or directory doesn't exist
+    # If the request is not for a real file or directory...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+
+    # ...then rewrite it to index.php, passing the requested URL as a parameter.
+    RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
 </IfModule>

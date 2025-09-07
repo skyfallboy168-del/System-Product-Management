@@ -15,6 +15,7 @@ class Suppliers extends Controller {
     }
 
     public function index() {
+        \Core\Auth::gate('settings-manage');
         $suppliers = $this->supplierModel->findAllByCompany($_SESSION['company_id']);
         $data = [
             'title' => 'Suppliers',
@@ -24,6 +25,7 @@ class Suppliers extends Controller {
     }
 
     public function add() {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = $this->getPostData();
@@ -49,6 +51,7 @@ class Suppliers extends Controller {
     }
 
     public function edit($id) {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             $data = $this->getPostData();
@@ -80,6 +83,7 @@ class Suppliers extends Controller {
     }
 
     public function delete($id) {
+        \Core\Auth::gate('settings-manage');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($this->supplierModel->delete($id, $_SESSION['company_id'])) {
                 header('Location: ' . URL_ROOT . '/public/suppliers');

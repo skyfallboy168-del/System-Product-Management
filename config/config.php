@@ -19,13 +19,16 @@ define('DB_PASS', ''); // Your MySQL root password, often empty in XAMPP
 define('DB_CHARSET', 'utf8mb4');
 
 // --- Application Paths ---
-// No trailing slash
-define('APP_ROOT', dirname(__DIR__));
-define('URL_ROOT', 'http://localhost/biz-master'); // Change this to your domain in production
+// APP_ROOT is now defined in public/index.php
+// URL_ROOT should be the base URL of your application's public folder.
+define('URL_ROOT', 'http://localhost/biz-master'); // Change this if your folder name is different
 
 // --- Application Information ---
 define('APP_NAME', 'BizMaster Pro');
 define('APP_VERSION', '1.0.0');
 
 // --- Session ---
-session_start();
+// Start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
