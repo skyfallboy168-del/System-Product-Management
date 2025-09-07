@@ -6,7 +6,7 @@ use Core\Controller;
 class PagesController extends Controller {
 
     public function __construct() {
-        // This constructor can be empty if no model is needed for the default pages
+        // This constructor is intentionally empty for the pages controller.
     }
 
     public function index() {
